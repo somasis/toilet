@@ -29,6 +29,7 @@
 
 static void filter_crop(context_t *);
 static void filter_rainbow(context_t *);
+static void filter_trans(context_t *);
 static void filter_metal(context_t *);
 static void filter_flip(context_t *);
 static void filter_flop(context_t *);
@@ -47,6 +48,7 @@ const lookup[] =
 {
     { "crop", filter_crop, "crop unused blanks" },
     { "rainbow", filter_rainbow, "add a rainbow colour effect" },
+    { "trans", filter_trans, "add a trans flag esque colour effect" },
     { "metal", filter_metal, "add a metallic colour effect" },
     { "flip", filter_flip, "flip horizontally" },
     { "flop", filter_flop, "flip vertically" },
@@ -205,6 +207,31 @@ static void filter_rainbow(context_t *cx)
         {
             caca_set_color_ansi(cx->torender,
                                  rainbow[(x / 2 + y + cx->lines) % 6],
+                                 CACA_TRANSPARENT);
+            caca_put_char(cx->torender, x, y, ch);
+        }
+    }
+}
+
+static void filter_trans(context_t *cx)
+{
+    static unsigned char const trans[] =
+    {
+        CACA_LIGHTMAGENTA, CACA_WHITE, CACA_LIGHTBLUE,
+    };
+    unsigned int x, y, w, h;
+
+    w = caca_get_canvas_width(cx->torender);
+    h = caca_get_canvas_height(cx->torender);
+
+    for(y = 0; y < h; y++)
+        for(x = 0; x < w; x++)
+    {
+        unsigned long int ch = caca_get_char(cx->torender, x, y);
+        if(ch != (unsigned char)' ')
+        {
+            caca_set_color_ansi(cx->torender,
+                                 trans[(x / 2 + y + cx->lines) % 3],
                                  CACA_TRANSPARENT);
             caca_put_char(cx->torender, x, y, ch);
         }
